@@ -2,6 +2,7 @@ import os
 
 import discord
 from discord.ext import commands
+from keep_alive import keep_alive
 
 if os.path.isfile(".env"):
     from dotenv import load_dotenv
@@ -18,4 +19,5 @@ async def setup_hook():
     await bot.load_extension("cogs.aichat")
 
 
+keep_alive()
 bot.run(os.getenv("discord"))
