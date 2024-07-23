@@ -94,6 +94,7 @@ class Gemini:
                 except:
                     traceback.print_exc()
                     count += 1
+                asyncio.sleep(2)
             response.raise_for_status()
 
 
