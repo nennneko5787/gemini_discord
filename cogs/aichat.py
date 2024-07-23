@@ -25,6 +25,7 @@ class AIChatCog(commands.Cog):
             os.getenv("gemini1"),
             os.getenv("gemini2"),
             os.getenv("gemini3"),
+            os.getenv("gemini4"),
         ]
         self.proxies = [
             f"{proxy.get('protocols', [])[0]}://{proxy.get('ip')}:{proxy.get('port')}"
