@@ -2,4 +2,4 @@ discord.py
 aiohttp
 aiohttp-proxy
 asyncpg
-flask
+fastapi

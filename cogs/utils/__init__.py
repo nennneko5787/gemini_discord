@@ -1,1 +1,2 @@
-from .gemini import Gemini
+from .Gemini import Gemini
+from .GeminiAPIKey import GeminiAPIKey

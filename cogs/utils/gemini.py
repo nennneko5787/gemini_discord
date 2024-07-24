@@ -3,17 +3,23 @@ import json
 import traceback
 from typing import List
 import random
+import base64
 
+import aiohttp.client_exceptions
+import discord
 import aiohttp
+
+from .GeminiAPIKey import GeminiAPIKey
 
 
 class Gemini:
     @classmethod
-    async def stream(
+    async def chat(
         cls,
         content: str,
-        apiKeys: List[str],
+        apiKeys: List[GeminiAPIKey],
         history: List[dict] = None,
+        files: List[discord.Attachment] = None,
         model: str = "gemini-1.5-pro",
         proxies: List[str] = None,
     ) -> str:
@@ -28,14 +34,32 @@ class Gemini:
         if not history:
             history = list()
 
+        parts = []
+
+        parts.append(
+            {
+                "text": content,
+            }
+        )
+
+        if files:
+            for file in files:
+                mime = file.content_type
+                rawData = await file.read()
+                data = base64.b64encode(rawData).decode()
+                parts.append(
+                    {
+                        "inlineData": {
+                            "mimeType": mime,
+                            "data": data,
+                        },
+                    }
+                )
+
         contents = history
         contents.append(
             {
-                "parts": [
-                    {
-                        "text": content,
-                    },
-                ],
+                "parts": parts,
                 "role": "user",
             }
         )
@@ -69,9 +93,13 @@ class Gemini:
                 else:
                     proxy = None
                 apiKey = apiKeys[count]
+                if apiKey.limit <= 0:
+                    print("ratelimit sine")
+                    asyncio.create_task(apiKey.wait())
+                    continue
                 try:
                     async with session.post(
-                        f"https://generativelanguage.googleapis.com/v1beta/models/{model}:streamGenerateContent?key={apiKey}",
+                        f"https://generativelanguage.googleapis.com/v1beta/models/{model}:streamGenerateContent?key={apiKey.key}",
                         json=data,
                         headers=headers,
                         proxy=proxy,
@@ -91,15 +119,22 @@ class Gemini:
                                 .get("text")
                             )
                         return "".join(responseList)
-                except:
+                except aiohttp.client_exceptions.ClientResponseError as e:
                     traceback.print_exc()
+                    if e.status == 429:
+                        print("ratelimit sine...?")
+                        await asyncio.create_task(apiKey.wait())
+                        count += 1
+                    else:
+                        response.raise_for_status()
+                except:
+                    await asyncio.create_task(apiKey.wait())
                     count += 1
-                asyncio.sleep(2)
             response.raise_for_status()
 
 
 async def main():
-    print("result", await Gemini.stream("こんにちは"))
+    print("result", await Gemini.chat("こんにちは"))
 
 
 if __name__ == "__main__":

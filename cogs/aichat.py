@@ -8,7 +8,7 @@ import asyncpg
 import discord
 from discord.ext import commands
 
-from .utils import Gemini
+from .utils import Gemini, GeminiAPIKey
 
 if os.path.isfile(".env"):
     from dotenv import load_dotenv
@@ -20,13 +20,7 @@ class AIChatCog(commands.Cog):
     def __init__(self, bot: commands.Bot, *, proxies: dict):
         self.bot: commands.Bot = bot
         self.chatHistories: dict = defaultdict(list)
-        self.apiKeys = [
-            os.getenv("gemini0"),
-            os.getenv("gemini1"),
-            os.getenv("gemini2"),
-            os.getenv("gemini3"),
-            os.getenv("gemini4"),
-        ]
+        self.apiKeys = [GeminiAPIKey(os.getenv(f"gemini{i}")) for i in range(5)]
         self.proxies = [
             f"{proxy.get('protocols', [])[0]}://{proxy.get('ip')}:{proxy.get('port')}"
             for proxy in proxies.get("data", [])
@@ -88,23 +82,23 @@ class AIChatCog(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         if (
-            message.channel.id != 1264471909903368338
+            message.channel.id != 1265578414572572702
             or message.author.bot
             or message.author.system
         ):
             return
         async with message.channel.typing():
             try:
-                content = await Gemini.stream(
+                content = await Gemini.chat(
                     message.clean_content,
                     apiKeys=self.apiKeys,
                     history=self.chatHistories[message.author.id],
+                    files=message.attachments,
                     proxies=None,
                 )
             except Exception as e:
                 traceback.print_exc()
-                await message.reply("Error", delete_after=5)
-                await message.delete(delay=5)
+                await message.reply("Error")
                 return
             self.chatHistories[message.author.id].append(
                 {"parts": [{"text": message.clean_content}], "role": "user"}
