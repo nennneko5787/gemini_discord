@@ -12,4 +12,4 @@ class Database:
     
     @classmethod
     async def connect(cls):
-        cls.pool = await asyncpg.create_pool(os.getenv("dsn"))
+        cls.pool = await asyncpg.create_pool(os.getenv("dsn"), statement_cache_size=0)
