@@ -120,4 +120,4 @@ class AIChatCog(commands.Cog):
 
 async def setup(bot: commands.Bot):
     async with aiohttp.ClientSession() as session:
-        await bot.add_cog(AIChatCog(bot)
+        await bot.add_cog(AIChatCog(bot))
