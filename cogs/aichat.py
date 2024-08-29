@@ -8,6 +8,7 @@ import asyncpg
 import discord
 from discord.ext import commands
 
+from .dbservice import Database
 from .utils import Gemini, GeminiAPIKey
 
 if os.path.isfile(".env"):
@@ -17,26 +18,18 @@ if os.path.isfile(".env"):
 
 
 class AIChatCog(commands.Cog):
-    def __init__(self, bot: commands.Bot, *, proxies: dict):
+    def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
         self.chatHistories: dict = defaultdict(list)
         self.apiKeys = [GeminiAPIKey(os.getenv(f"gemini{i}")) for i in range(5)]
-        self.proxies = [
-            f"{proxy.get('protocols', [])[0]}://{proxy.get('ip')}:{proxy.get('port')}"
-            for proxy in proxies.get("data", [])
-        ]
         print("AIChatCog loaded")
 
     @commands.Cog.listener()
     async def on_ready(self):
         await self.bot.tree.sync()
-        self.pool: asyncpg.Pool = await asyncpg.create_pool(
-            os.getenv("dsn"), statement_cache_size=0
-        )
-        async with self.pool.acquire() as conn:
-            rows = await conn.fetch("SELECT * FROM users")
-            for row in rows:
-                self.chatHistories[row["id"]] = json.loads(row["data"])
+        rows = await Database.pool.fetch("SELECT * FROM users")
+        for row in rows:
+            self.chatHistories[row["id"]] = json.loads(row["data"])
         print("Database connected and chat histories loaded.")
 
     @commands.hybrid_command(
@@ -46,18 +39,17 @@ class AIChatCog(commands.Cog):
         await ctx.defer(ephemeral=True)
         self.chatHistories[ctx.author.id] = []
         try:
-            async with self.pool.acquire() as conn:
-                await conn.execute(
-                    """
+            await Database.pool.execute(
+                """
                     INSERT INTO users (id, data)
                     VALUES ($1, $2)
                     ON CONFLICT (id)
                     DO UPDATE SET
                         data = EXCLUDED.data
-                    """,
-                    ctx.author.id,
-                    json.dumps(self.chatHistories[ctx.author.id]),
-                )
+                """,
+                ctx.author.id,
+                json.dumps(self.chatHistories[ctx.author.id]),
+            )
         except Exception as e:
             traceback.print_exc()
             await ctx.send("エラーが発生しました。", ephemeral=True)
@@ -111,26 +103,21 @@ class AIChatCog(commands.Cog):
                 await message.reply(c)
 
             try:
-                async with self.pool.acquire() as conn:
-                    await conn.execute(
-                        """
+                await Database.pool.execute(
+                    """
                         INSERT INTO users (id, data)
                         VALUES ($1, $2)
                         ON CONFLICT (id)
                         DO UPDATE SET
                             data = EXCLUDED.data
-                        """,
-                        message.author.id,
-                        json.dumps(self.chatHistories[message.author.id]),
-                    )
+                    """,
+                    message.author.id,
+                    json.dumps(self.chatHistories[message.author.id]),
+                )
             except Exception as e:
                 traceback.print_exc()
 
 
 async def setup(bot: commands.Bot):
     async with aiohttp.ClientSession() as session:
-        async with session.get(
-            "https://proxylist.geonode.com/api/proxy-list?limit=500&page=1&sort_by=lastChecked&sort_type=desc"
-        ) as response:
-            proxies = await response.json()
-            await bot.add_cog(AIChatCog(bot, proxies=proxies))
+        await bot.add_cog(AIChatCog(bot)
