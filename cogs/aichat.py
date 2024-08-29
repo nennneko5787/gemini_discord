@@ -75,7 +75,7 @@ class AIChatCog(commands.Cog):
     async def on_message(self, message: discord.Message):
         if (
             message.channel.id != 1264471909903368338
-            or message.channel.id != 1265578414572572702
+            and message.channel.id != 1265578414572572702
             or message.author.bot
             or message.author.system
         ):
