@@ -6,6 +6,8 @@ import discord
 from discord.ext import commands
 from fastapi import FastAPI
 
+from cogs.dbservice import Database
+
 if os.path.isfile(".env"):
     from dotenv import load_dotenv
 
@@ -25,8 +27,10 @@ async def setup_hook():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    await Database.connect()
     asyncio.create_task(bot.start(os.getenv("discord")))
     yield
+    await Database.pool.close()
 
 
 app = FastAPI(lifespan=lifespan)
