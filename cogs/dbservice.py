@@ -1,4 +1,11 @@
+import os
+
 import asyncpg
+
+if os.path.isfile(".env"):
+    from dotenv import load_dotenv
+
+    load_dotenv()
 
 class Database:
     pool: asyncpg.Pool = None
