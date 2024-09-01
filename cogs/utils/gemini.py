@@ -123,12 +123,12 @@ class Gemini:
                     traceback.print_exc()
                     if e.status == 429:
                         print("ratelimit sine...?")
-                        await asyncio.create_task(apiKey.wait())
+                        asyncio.create_task(apiKey.wait())
                         count += 1
                     else:
                         response.raise_for_status()
                 except:
-                    await asyncio.create_task(apiKey.wait())
+                    asyncio.create_task(apiKey.wait())
                     count += 1
             response.raise_for_status()
 
