@@ -93,6 +93,9 @@ class Gemini:
                 else:
                     proxy = None
                 apiKey = apiKeys[count]
+                if apiKey.isWaiting == True:
+                    print("apiKey is waiting now")
+                    continue
                 if apiKey.limit <= 0:
                     print("ratelimit sine")
                     asyncio.create_task(apiKey.wait())
