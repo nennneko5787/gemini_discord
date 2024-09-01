@@ -16,7 +16,7 @@ class GeminiAPIKey:
     async def wait(self):
         print(f"APIKey {self.key} is waiting now")
         self.isWaiting = True
-        await asyncio.sleep(60)
+        await asyncio.sleep(61)
         self.limit = 2
         self.isWaiting = False
         print("waited")
