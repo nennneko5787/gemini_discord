@@ -109,6 +109,7 @@ class Gemini:
                         headers=headers,
                         proxy=proxy,
                     ) as response:
+                        print(await response.text())
                         response.raise_for_status()
                         byteList = []
                         async for line in response.content:
