@@ -136,7 +136,6 @@ class Gemini:
                 except:
                     asyncio.create_task(apiKey.wait())
                     count += 1
-            response.raise_for_status()
 
 
 async def main():
