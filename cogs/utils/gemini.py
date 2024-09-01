@@ -20,7 +20,7 @@ class Gemini:
         apiKeys: List[GeminiAPIKey],
         history: List[dict] = None,
         files: List[discord.Attachment] = None,
-        model: str = "gemini-1.5-pro-exp-0801",
+        model: str = "gemini-1.5-pro-exp-0827",
         proxies: List[str] = None,
     ) -> str:
         count = 0
@@ -95,10 +95,12 @@ class Gemini:
                 apiKey = apiKeys[count]
                 if apiKey.isWaiting == True:
                     print("apiKey is waiting now")
+                    count += 1
                     continue
                 if apiKey.limit <= 0:
                     print("ratelimit sine")
                     asyncio.create_task(apiKey.wait())
+                    count += 1
                     continue
                 try:
                     async with session.post(
