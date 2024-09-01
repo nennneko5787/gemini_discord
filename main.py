@@ -1,5 +1,6 @@
 import asyncio
 import os
+import sys
 from contextlib import asynccontextmanager
 
 import discord
@@ -14,6 +15,9 @@ if os.path.isfile(".env"):
     load_dotenv()
 
 discord.utils.setup_logging()
+
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 intents = discord.Intents.default()
 intents.message_content = True

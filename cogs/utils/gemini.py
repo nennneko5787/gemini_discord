@@ -25,6 +25,7 @@ class Gemini:
     ) -> str:
         count = 0
         maxcount = len(apiKeys)
+        print(maxcount)
 
         headers = {
             "Content-Type": "application/json",
@@ -93,12 +94,12 @@ class Gemini:
                 else:
                     proxy = None
                 apiKey = apiKeys[count]
-                if apiKey.isWaiting == True:
-                    print("apiKey is waiting now")
+                if apiKey.isWaiting:
+                    print("apiKeyは現在待機中です")
                     count += 1
                     continue
                 if apiKey.limit <= 0:
-                    print("ratelimit sine")
+                    print("レートリミットに達しました")
                     asyncio.create_task(apiKey.wait())
                     count += 1
                     continue
@@ -109,7 +110,6 @@ class Gemini:
                         headers=headers,
                         proxy=proxy,
                     ) as response:
-                        print(await response.text())
                         response.raise_for_status()
                         byteList = []
                         async for line in response.content:
@@ -128,18 +128,24 @@ class Gemini:
                 except aiohttp.client_exceptions.ClientResponseError as e:
                     traceback.print_exc()
                     if e.status == 429:
-                        print("ratelimit sine...?")
+                        print("レートリミットに達した可能性があります...")
                         asyncio.create_task(apiKey.wait())
                         count += 1
                     else:
                         response.raise_for_status()
-                except:
+                except Exception:
+                    traceback.print_exc()
                     asyncio.create_task(apiKey.wait())
                     count += 1
 
 
 async def main():
-    print("result", await Gemini.chat("こんにちは"))
+    print(
+        "result",
+        await Gemini.chat(
+            "こんにちは", apiKeys=[GeminiAPIKey(key="dummyKey", limit=10)]
+        ),
+    )
 
 
 if __name__ == "__main__":

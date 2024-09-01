@@ -23,6 +23,7 @@ class AIChatCog(commands.Cog):
         self.bot: commands.Bot = bot
         self.chatHistories: dict = defaultdict(list)
         self.apiKeys = [GeminiAPIKey(os.getenv(f"gemini{i}")) for i in range(20)]
+        print(len(self.apiKeys))
         self.waitList = []
         print("AIChatCog loaded")
 
