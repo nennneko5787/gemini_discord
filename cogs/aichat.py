@@ -1,3 +1,4 @@
+import asyncio
 import json
 import os
 import traceback
@@ -22,6 +23,7 @@ class AIChatCog(commands.Cog):
         self.bot: commands.Bot = bot
         self.chatHistories: dict = defaultdict(list)
         self.apiKeys = [GeminiAPIKey(os.getenv(f"gemini{i}")) for i in range(5)]
+        self.waitList = []
         print("AIChatCog loaded")
 
     @commands.Cog.listener()
@@ -80,6 +82,10 @@ class AIChatCog(commands.Cog):
             or message.author.system
         ):
             return
+        if message.author.id in self.waitList:
+            await message.reply("メッセージ生成後5秒待つ必要があります。")
+            return
+        self.waitList.append(message.author.id)
         async with message.channel.typing():
             try:
                 content = await Gemini.chat(
@@ -103,20 +109,23 @@ class AIChatCog(commands.Cog):
             for c in contents:
                 await message.reply(c)
 
-            try:
-                await Database.pool.execute(
-                    """
-                        INSERT INTO users (id, data)
-                        VALUES ($1, $2)
-                        ON CONFLICT (id)
-                        DO UPDATE SET
-                            data = EXCLUDED.data
-                    """,
-                    message.author.id,
-                    json.dumps(self.chatHistories[message.author.id]),
-                )
-            except Exception as e:
-                traceback.print_exc()
+        try:
+            await Database.pool.execute(
+                """
+                    INSERT INTO users (id, data)
+                    VALUES ($1, $2)
+                    ON CONFLICT (id)
+                    DO UPDATE SET
+                        data = EXCLUDED.data
+                """,
+                message.author.id,
+                json.dumps(self.chatHistories[message.author.id]),
+            )
+        except Exception as e:
+            traceback.print_exc()
+
+        await asyncio.sleep(5)
+        self.waitList.remove(message.author.id)
 
 
 async def setup(bot: commands.Bot):

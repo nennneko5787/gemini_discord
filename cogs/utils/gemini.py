@@ -1,13 +1,13 @@
 import asyncio
+import base64
 import json
+import random
 import traceback
 from typing import List
-import random
-import base64
 
+import aiohttp
 import aiohttp.client_exceptions
 import discord
-import aiohttp
 
 from .GeminiAPIKey import GeminiAPIKey
 
