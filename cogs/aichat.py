@@ -1,6 +1,7 @@
 import asyncio
 import json
 import os
+import random
 import traceback
 from collections import defaultdict
 
@@ -90,6 +91,7 @@ class AIChatCog(commands.Cog):
         try:
             async with message.channel.typing():
                 try:
+                    random.shuffle(self.apiKeys)
                     content = await Gemini.chat(
                         message.clean_content,
                         apiKeys=self.apiKeys,
