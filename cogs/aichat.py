@@ -87,46 +87,47 @@ class AIChatCog(commands.Cog):
             await message.reply("メッセージ生成後5秒待つ必要があります。")
             return
         self.waitList.append(message.author.id)
-        async with message.channel.typing():
+        try:
+            async with message.channel.typing():
+                try:
+                    content = await Gemini.chat(
+                        message.clean_content,
+                        apiKeys=self.apiKeys,
+                        history=self.chatHistories[message.author.id],
+                        files=message.attachments,
+                        proxies=None,
+                    )
+                except Exception as e:
+                    traceback.print_exc()
+                    await message.reply("Error")
+                    return
+                self.chatHistories[message.author.id].append(
+                    {"parts": [{"text": message.clean_content}], "role": "user"}
+                )
+                self.chatHistories[message.author.id].append(
+                    {"parts": [{"text": content}], "role": "model"}
+                )
+                contents = self.splitContent(content)
+                for c in contents:
+                    await message.reply(c)
+    
             try:
-                content = await Gemini.chat(
-                    message.clean_content,
-                    apiKeys=self.apiKeys,
-                    history=self.chatHistories[message.author.id],
-                    files=message.attachments,
-                    proxies=None,
+                await Database.pool.execute(
+                    """
+                        INSERT INTO users (id, data)
+                        VALUES ($1, $2)
+                        ON CONFLICT (id)
+                        DO UPDATE SET
+                            data = EXCLUDED.data
+                    """,
+                    message.author.id,
+                    json.dumps(self.chatHistories[message.author.id]),
                 )
             except Exception as e:
                 traceback.print_exc()
-                await message.reply("Error")
-                return
-            self.chatHistories[message.author.id].append(
-                {"parts": [{"text": message.clean_content}], "role": "user"}
-            )
-            self.chatHistories[message.author.id].append(
-                {"parts": [{"text": content}], "role": "model"}
-            )
-            contents = self.splitContent(content)
-            for c in contents:
-                await message.reply(c)
-
-        try:
-            await Database.pool.execute(
-                """
-                    INSERT INTO users (id, data)
-                    VALUES ($1, $2)
-                    ON CONFLICT (id)
-                    DO UPDATE SET
-                        data = EXCLUDED.data
-                """,
-                message.author.id,
-                json.dumps(self.chatHistories[message.author.id]),
-            )
-        except Exception as e:
-            traceback.print_exc()
-
-        await asyncio.sleep(5)
-        self.waitList.remove(message.author.id)
+        finally:
+            await asyncio.sleep(5)
+            self.waitList.remove(message.author.id)
 
 
 async def setup(bot: commands.Bot):
