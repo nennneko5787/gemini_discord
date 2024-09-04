@@ -85,7 +85,7 @@ class AIChatCog(commands.Cog):
         ):
             return
         if message.author.id in self.waitList:
-            await message.reply("メッセージ生成後5秒待つ必要があります。")
+            await message.reply("メッセージ生成を待つ必要があります。")
             return
         self.waitList.append(message.author.id)
         try:
@@ -128,7 +128,6 @@ class AIChatCog(commands.Cog):
             except Exception as e:
                 traceback.print_exc()
         finally:
-            await asyncio.sleep(5)
             self.waitList.remove(message.author.id)
 
 
