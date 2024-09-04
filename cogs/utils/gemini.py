@@ -125,15 +125,7 @@ class Gemini:
                                 .get("text")
                             )
                         return "".join(responseList)
-                except aiohttp.client_exceptions.ClientResponseError as e:
-                    traceback.print_exc()
-                    if e.status == 429:
-                        print("レートリミットに達した可能性があります...")
-                        asyncio.create_task(apiKey.wait())
-                        count += 1
-                    else:
-                        response.raise_for_status()
-                except Exception:
+                except:
                     traceback.print_exc()
                     asyncio.create_task(apiKey.wait())
                     count += 1
