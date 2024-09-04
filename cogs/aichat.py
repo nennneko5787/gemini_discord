@@ -22,6 +22,7 @@ if os.path.isfile(".env"):
 class AIChatCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
+        self.loaded = False
         self.chatHistories: dict = defaultdict(list)
         self.apiKeys = [GeminiAPIKey(os.getenv(f"gemini{i}")) for i in range(20)]
         print(len(self.apiKeys))
@@ -35,12 +36,15 @@ class AIChatCog(commands.Cog):
         for row in rows:
             self.chatHistories[row["id"]] = json.loads(row["data"])
         print("Database connected and chat histories loaded.")
+        self.loaded = True
 
     @commands.hybrid_command(
         name="delmsghistory", description="Geminiとのメッセージ履歴を削除します。"
     )
     async def delmsghistory(self, ctx: commands.Context):
         await ctx.defer(ephemeral=True)
+        if not self.loaded:
+            await ctx.send("データベースの初期化が終わっていません", ephemeral=True)
         self.chatHistories[ctx.author.id] = []
         try:
             await Database.pool.execute(
@@ -82,6 +86,7 @@ class AIChatCog(commands.Cog):
             and message.channel.id != 1265578414572572702
             or message.author.bot
             or message.author.system
+            or not self.loaded
         ):
             return
         if message.author.id in self.waitList:
