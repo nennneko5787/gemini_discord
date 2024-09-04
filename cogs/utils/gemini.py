@@ -20,7 +20,7 @@ class Gemini:
         apiKeys: List[GeminiAPIKey],
         history: List[dict] = None,
         files: List[discord.Attachment] = None,
-        model: str = "gemini-1.5-pro-exp-0801",
+        model: str = "gemini-1.5-pro-exp-0827",
         proxies: List[str] = None,
     ) -> str:
         count = 0
