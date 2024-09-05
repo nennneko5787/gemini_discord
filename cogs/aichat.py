@@ -162,8 +162,8 @@ class AIChatCog(commands.Cog):
                         apiKeys=self.apiKeys,
                         history=history,
                         files=message.attachments,
+                        model=self.model[message.author.id],
                         proxies=None,
-                        model=self.model[message.author.id]
                     )
                 except Exception as e:
                     traceback.print_exc()
