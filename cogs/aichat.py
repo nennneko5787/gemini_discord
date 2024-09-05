@@ -45,7 +45,7 @@ class AIChatCog(commands.Cog):
     @commands.hybrid_command(
         name="model", description="Geminiのモデルを変更します。"
     )
-    async def model(self, ctx: commands.Context, model: str = "gemini-1.5-pro-exp-0827"):
+    async def modelCommand(self, ctx: commands.Context, model: str = "gemini-1.5-pro-exp-0827"):
         await ctx.defer(ephemeral=True)
         if not self.loaded:
             await ctx.send("データベースの初期化が終わっていません", ephemeral=True)
@@ -71,7 +71,7 @@ class AIChatCog(commands.Cog):
     @commands.hybrid_command(
         name="clear", description="Geminiとのメッセージ履歴を削除します。"
     )
-    async def clear(self, ctx: commands.Context):
+    async def clearCommand(self, ctx: commands.Context):
         await ctx.defer(ephemeral=True)
         if not self.loaded:
             await ctx.send("データベースの初期化が終わっていません", ephemeral=True)
@@ -97,7 +97,7 @@ class AIChatCog(commands.Cog):
     @commands.hybrid_command(
         name="clearnsfw", description="NSFW Geminiとのメッセージ履歴を削除します。"
     )
-    async def clearnsfw(self, ctx: commands.Context):
+    async def clearNSFWCommand(self, ctx: commands.Context):
         await ctx.defer(ephemeral=True)
         if not self.loaded:
             await ctx.send("データベースの初期化が終わっていません", ephemeral=True)
