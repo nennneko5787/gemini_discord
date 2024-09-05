@@ -169,16 +169,16 @@ class AIChatCog(commands.Cog):
                     traceback.print_exc()
                     await message.reply("Error")
                     return
+                print(content)
+                contents = self.splitContent(content)
+                for c in contents:
+                    await message.reply(c)
                 history.append(
                     {"parts": [{"text": message.clean_content}], "role": "user"}
                 )
                 history.append(
                     {"parts": [{"text": content}], "role": "model"}
                 )
-                contents = self.splitContent(content)
-                for c in contents:
-                    await message.reply(c)
-    
             try:
                 await Database.pool.execute(
                     f"""
