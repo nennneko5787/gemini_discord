@@ -45,7 +45,7 @@ class AIChatCog(commands.Cog):
     @commands.hybrid_command(
         name="model", description="Geminiのモデルを変更します。"
     )
-    async def clear(self, ctx: commands.Context, model: str):
+    async def model(self, ctx: commands.Context, model: str = "gemini-1.5-pro-exp-0827"):
         await ctx.defer(ephemeral=True)
         if not self.loaded:
             await ctx.send("データベースの初期化が終わっていません", ephemeral=True)
