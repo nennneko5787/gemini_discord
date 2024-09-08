@@ -172,7 +172,7 @@ class AIChatCog(commands.Cog):
                 print(content)
                 contents = self.splitContent(content)
                 for c in contents:
-                    await message.reply(c)
+                    await message.reply(c, allowed_mentions=discord.AllowedMentions.none())
                 history.append(
                     {"parts": [{"text": message.clean_content}], "role": "user"}
                 )
