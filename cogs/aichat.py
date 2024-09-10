@@ -138,8 +138,8 @@ class AIChatCog(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         if (
-            message.channel.id != 1264471909903368338
-            and message.channel.id != 1265578414572572702
+            message.channel.id != 1283054946056540180
+            and message.channel.id != 1283055072728580177
             or message.author.bot
             or message.author.system
             or not self.loaded
@@ -148,7 +148,7 @@ class AIChatCog(commands.Cog):
         if message.author.id in self.waitList:
             await message.reply("メッセージ生成を待つ必要があります。")
             return
-        if message.channel.id == 1264471909903368338:
+        if message.channel.id == 1283054946056540180:
             history = self.chatHistories[message.author.id]
         else:
             history = self.chatHistoriesNSFW[message.author.id]
