@@ -26,7 +26,7 @@ class AIChatCog(commands.Cog):
         self.model: dict = defaultdict(str)
         self.chatHistories: dict = defaultdict(list)
         self.chatHistoriesNSFW: dict = defaultdict(list)
-        self.apiKeys = [GeminiAPIKey(os.getenv(f"gemini{i}")) for i in range(20)]
+        self.apiKeys = [GeminiAPIKey(os.getenv(f"gemini{i}")) for i in range(28)]
         print(len(self.apiKeys))
         self.waitList = []
         print("AIChatCog loaded")
